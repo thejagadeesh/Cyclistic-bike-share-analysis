@@ -1,5 +1,50 @@
-# Cyclistic-bike-share-analysis
+Title: Cyclistic Bike-Share Analysis Case Study: Maximizing Annual Memberships
 
+Introduction:
+Welcome to my Cyclistic bike-share analysis case study! As a junior data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago, my primary objective was to help the company achieve rapid success by maximizing the number of annual memberships. By delving into how casual riders and annual members utilized Cyclistic bikes differently, my team aimed to design a new marketing strategy to convert casual riders into loyal annual members. This case study presents the data analysis process I followed, from asking the right questions to delivering actionable insights through compelling visualizations.
+
+Business Task:
+My manager, Lily Moreno, specifically tasked me with analyzing how annual members and casual riders use Cyclistic bikes differently. The goal was to extract valuable insights to shape the future marketing program and drive increased annual memberships.
+
+Data Sources:
+To conduct this analysis, I utilized real bike-share data publicly available from Motivate International Inc., treating it as Cyclistic's company data. The dataset comprised 12 CSV files, covering the period from February 2022 to January 2023. Each file contained essential columns, such as ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, and member_casual.
+
+Data Preparation and Cleaning:
+I began by exploring the data in Excel, but due to its massive size (over 5 million rows), I shifted to SQL in BigQuery for efficient processing. The initial steps involved combining the CSV files using the UNION operator and performing data cleaning to ensure accuracy. I thoroughly checked for misspellings and irregularities in string columns, enabling reliable analysis. Additionally, I calculated the ride duration in minutes and introduced new columns indicating the day of the week and month for each ride.
+
+Key Findings and Insights:
+
+Ride Length:
+Casual riders exhibited longer average ride durations (26.3 minutes) compared to annual members (13.0 minutes). This insight implies that casual riders tend to use the bikes for leisurely activities or extended rides, while members prefer shorter, more utilitarian trips.
+
+Day of the Week:
+Both annual members and casual riders displayed higher ride counts on weekends, particularly on Saturdays and Sundays. While annual members' ride counts remained relatively consistent throughout the week, casual riders showed a substantial increase during weekends.
+
+Month:
+Ride counts for both groups experienced a noticeable surge during the summer months, spanning from May to September. Casual riders, in particular, exhibited a significant spike in ride counts during May, June, and July, whereas annual members demonstrated a more evenly distributed pattern throughout the summer.
+
+Rideable Type:
+Classic bikes emerged as the most preferred type for both annual members and casual riders. However, electric bikes enjoyed higher popularity among annual members compared to casual riders.
+
+Popular Stations:
+Kingsbury St & Kinzie St, Clark St & Elm St, and Wells St & Concord Ln emerged as the top three most popular starting and ending stations for both annual members and casual riders.
+
+Recommendations:
+
+Based on my analysis, I propose the following top three recommendations to convert casual riders into loyal annual members:
+
+Target Weekends and Summer Months:
+Implement targeted marketing efforts, promotional offers, discounts, and special events during weekends and summer to attract more casual riders and encourage them to sign up for annual memberships.
+
+Promote Electric Bikes:
+Highlight the numerous benefits of electric bikes, such as easier navigation and extended ride capabilities, to entice casual riders into making the switch to annual memberships.
+
+Loyalty Rewards Program:
+Introduce a loyalty rewards program tailored for frequent riders, offering enticing rewards like points, discounts, or exclusive perks for reaching specific ride milestones. This incentivization strategy aims to encourage casual riders to commit to annual memberships.
+
+By applying these data-driven recommendations, Cyclistic can effectively convert casual riders into loyal annual members, ultimately maximizing annual memberships and fostering future growth. This case study exemplifies my analytical skills and presents a concrete demonstration of my expertise for potential employers.
+
+-- Selecting all columns from the INFORMATION_SCHEMA.COLUMN_FIELD_PATHS table
 ```sql
 
 SELECT *
@@ -27,7 +72,7 @@ SELECT *
  ORDER BY column_name, table_name;
 ```
 
-#Need to merge all of the datasets into one dataset using UNION ALL
+-- Merge all datasets into one dataset using UNION ALL
 ```sql
 CREATE OR REPLACE TABLE divvy_tripdata. divvy_trip_datav1 AS 
 (
@@ -87,6 +132,7 @@ SELECT *
  )
 
 ```
+
 -- Create a new table "divvy_trip_datav2" with calculated columns for ride length, day of the week, and month
 ```sql
 CREATE TABLE divvy_tripdata.divvy_trip_datav2 AS
@@ -115,8 +161,10 @@ CREATE TABLE divvy_tripdata.divvy_trip_datav3 AS
 SELECT *
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav2`
 WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440;
+```
 
 -- Analyze ride length for all riders
+```sql
 SELECT AVG(ride_length_minutes) AS avg,
             MIN(ride_length_minutes) AS min,
             MAX(ride_length_minutes) AS max
@@ -139,6 +187,7 @@ Row	member_casual	avg_ride_length
 1	casual	21.771984707079753	
 2	member	12.3309992849560
 ```
+-- Average Ride Length for Members by Day of the Week
 ```sql
 SELECT
     CASE day_of_week
@@ -166,6 +215,7 @@ Row	day_of_week_name	 avg_ride_length_member
 6	Friday	12.145869377617808	
 7	Saturday	13.75060719038890	
 ```
+--Average Ride Length for Casuals by Day of the Week
 ```sql
 SELECT
     CASE day_of_week
@@ -193,6 +243,7 @@ Row	day_of_week_name	avg_ride_length_member
 6	Friday	20.410732757723341	
 7	Saturday	24.49270656487392	
 ```
+-- Average Ride Length for Member Riders by Month
 ```sql
 SELECT
     CASE month
@@ -226,6 +277,7 @@ Load more
 11	November	10.868295228397228	
 12	December	10.349790837818858	
 ```
+-- Average Ride Length for Casual Riders by Month
 ```sql
 SELECT
     CASE month
@@ -259,6 +311,7 @@ Load more
 11	November	15.555658359448838	
 12	December	13.4084558002412	
 ```
+-- Number of Rides Taken by Members in Each Month
 ```sql
 SELECT
     CASE month
@@ -292,39 +345,8 @@ Load more
 11	October	349209	
 12	September	404139	
 ```
-```sql
-SELECT
-    CASE month
-        WHEN 1 THEN 'January'
-        WHEN 2 THEN 'February'
-        WHEN 3 THEN 'March'
-        WHEN 4 THEN 'April'
-        WHEN 5 THEN 'May'
-        WHEN 6 THEN 'June'
-        WHEN 7 THEN 'July'
-        WHEN 8 THEN 'August'
-        WHEN 9 THEN 'September'
-        WHEN 10 THEN 'October'
-        WHEN 11 THEN 'November'
-        WHEN 12 THEN 'December'
-    END AS month,
-    COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE member_casual = 'casual'
-GROUP BY month
-ORDER BY month;
-```
-```sql
-Row	month	rides_taken	
-Load more
-6	October	208522	
-7	April	125888	
-8	November	100515	
-9	March	89539	
-10	December	44774	
-11	January	39892	
-12	February	21289	
-```
+ Number of Rides Taken by Casuals in Each Month
+
 ```sql
 SELECT
     CASE month
@@ -362,7 +384,7 @@ Row	month	rides_taken
 11	January	39892	
 12	February	21289	
 ```
--- Calculate the number of rides taken by each group on each day of the week
+-- Calculate the number of rides taken by Members on each day of the week
 ```sql
 SELECT CASE
             WHEN day_of_week = 1 THEN 'Sunday'
@@ -389,7 +411,7 @@ Row	day_of_the_week	rides_taken
 7	Saturday	446318	
 ```
 
--- Calculate the number of rides taken by each group on each day of the week
+-- Calculate the number of rides taken by Casuals on each day of the week
 ```sql
 SELECT CASE
             WHEN day_of_week = 1 THEN 'Sunday'
@@ -416,7 +438,7 @@ Row	day_of_the_week	rides_taken
 7	Saturday	472987	
 ```
 
--- Calculate the total number of visits to each station for members and casual riders
+-- Create a table to store the count of rides taken by members from each start station.
 ```sql
 CREATE TABLE divvy_tripdata.start_station_count_members AS
 SELECT start_station_name AS station_name,
@@ -426,6 +448,7 @@ WHERE start_station_name IS NOT NULL
 GROUP BY start_station_name
 ORDER BY COUNT(*) DESC;
 ```
+- Create a table to store the count of rides taken by members to each end station.
 ```sql
 CREATE TABLE divvy_tripdata.end_station_count_members AS
 SELECT end_station_name AS station_name,
@@ -435,6 +458,7 @@ WHERE end_station_name IS NOT NULL
 GROUP BY end_station_name
 ORDER BY COUNT(*) DESC;
 ```
+- Create a table to store the count of rides taken by casual riders from each start station.
 ```sql
 CREATE TABLE divvy_tripdata.start_station_count_casual AS
 SELECT start_station_name AS station_name,
@@ -444,6 +468,7 @@ WHERE start_station_name IS NOT NULL
 GROUP BY start_station_name
 ORDER BY COUNT(*) DESC;
 ```
+-- Create a table to store the count of rides taken by casual riders to each end station.
 ```sql
 CREATE TABLE divvy_tripdata.end_station_count_casual AS
 SELECT end_station_name AS station_name,
@@ -453,8 +478,7 @@ WHERE end_station_name IS NOT NULL
 GROUP BY end_station_name
 ORDER BY COUNT(*) DESC;
 ```
-
--- Calculate the number of rides taken by each group in each month
+--count of rides taken by members for each month
 ```sql
 SELECT
     CASE month
@@ -493,6 +517,7 @@ Row	month_name	member_casual	rides_taken
 11	November	member	236671	
 12	December	member	136736	
 ```
+--count of rides taken by casuals for each month
 ```sql
 SELECT
     CASE month
@@ -543,6 +568,7 @@ Row	member_casual	rides_taken
 1	casual	2336506	
 2	member	3405385
 ```
+-- Member Rides Count by Rideable Type
 ```sql
 SELECT rideable_type,
             COUNT(*) AS member_rides
@@ -557,6 +583,7 @@ Row	rideable_type	member_rides
 1	electric_bike	1670147	
 2	classic_bike	1735238
 ```
+-- Casual Rides Count by Rideable Type
 ```sql
 SELECT rideable_type,
             COUNT(*) AS casual_rides
@@ -573,7 +600,7 @@ Row	rideable_type	casual_rides
 3	classic_bike	895053
 ```
 
--- Calculate the total number of visits to each station for members and casual riders
+-- Calculate the total number of visits to start station for members and casual riders
 ```sql
 SELECT start_station_name AS station_name,
        member_casual,
@@ -596,7 +623,7 @@ Load more
 16	Narragansett & McLean	casual	80	
 17	Narragansett & McLean	member	99	
 ```
---Finding most popular start stations for members and casual riders…
+--Finding the most popular start stations for member riders
 ```sql
 SELECT start_station_name,
             COUNT(*) AS number_of_member_rides
@@ -622,6 +649,7 @@ Row	start_station_name	number_of_member_rides
 9	Clinton St & Madison St	19232	
 10	Broadway & Barry Ave	18004	
 ```
+--Finding the most popular start stations for casual riders
 ```sql
 SELECT start_station_name,
             COUNT(*) AS number_of_casual_rides
@@ -648,7 +676,7 @@ Load more
 
 ```
 
---Finding the most popular end stations for members and casual riders…
+--Finding the most popular end stations for member riders
 ```sql
 SELECT end_station_name,
             COUNT(*) AS number_of_member_rides
@@ -674,7 +702,7 @@ Row	end_station_name	number_of_member_rides
 10	Broadway & Barry Ave	18353	
 ```
 
---Finding the most popular end stations for members and casual riders…
+--Finding the most popular end stations for casual riders
 ```sql
 SELECT end_station_name,
             COUNT(*) AS number_of_member_rides
@@ -697,4 +725,44 @@ Load more
 9	Clark St & Armitage Ave	13887	
 10	Clark St & Lincoln Ave	13626	
 ```
+-- Calculate the total number of visits to each station for members by joining the start_station_count_members and end_station_count_members tables.
+-- We are using a JOIN operation on the station_name column to match the stations between the two tables.
+-- Then, we are adding the number_of_member_rides from both tables to get the total_member_visits for each station.
+```sql
+SELECT
+    start_count.station_name,
+    start_count.number_of_member_rides AS total_member_visits
+FROM
+    jaga-394318.divvy_tripdata.start_station_count_members start_count
+JOIN
+    jaga-394318.divvy_tripdata.end_station_count_members end_count
+ON
+    start_count.station_name = end_count.station_name
+ORDER BY
+    total_member_visits DESC;
+```
+
+-- This query calculates the total number of casual visits to each station by adding the number_of_casual_rides from the start_station_count_casual table 
+-- with the number_of_casual_rides from the end_station_count_casual table. The tables are joined on the station_name column.
+-- Selecting the station_name column from the start_station_count_casual table as station_name
+```sql
+SELECT 
+    start_count.station_name AS station_name,
+    -- Adding the number_of_casual_rides from both start_count and end_count tables to get total_casual_visits
+    start_count.number_of_casual_rides + end_count.number_of_casual_rides AS total_casual_visits
+-- Using the alias 'start_count' for the start_station_count_casual table
+FROM 
+    jaga-394318.divvy_tripdata.start_station_count_casual start_count
+-- Using the alias 'end_count' for the end_station_count_casual table
+JOIN 
+    jaga-394318.divvy_tripdata.end_station_count_casual end_count
+-- Joining the tables on the matching station_name column
+ON 
+    start_count.station_name = end_count.station_name
+-- Ordering the results in descending order of total_casual_visits
+ORDER BY 
+    total_casual_visits DESC;
+```
+
+
 
