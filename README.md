@@ -1,46 +1,29 @@
 # Cyclistic Bike-Share Analysis: Maximizing Annual Memberships
 ![cylistic](https://github.com/thejagadeesh/Cyclistic-bike-share-analysis/assets/114074976/16142766-bcca-4215-8d2c-9658cb7defb4)
 
-# Introduction:
+## Introduction:
 Welcome to the Cyclistic bike-share analysis case study! As a junior data analyst in the marketing team at Cyclistic, a bike-share company in Chicago, my primary objective was to maximize annual memberships by understanding how casual riders and annual members utilize Cyclistic bikes differently. This case study presents the data analysis process, insights, and actionable recommendations to boost annual memberships through targeted marketing strategies.
 
-# Business Task:
+## Business Task:
 My manager, Lily Moreno, assigned me the task of analyzing the usage patterns of annual members and casual riders to identify opportunities to increase annual memberships. The goal was to leverage data insights to design a compelling marketing program and drive growth in the number of annual members.
 
-# Data Sources:
+## Data Sources:
 To conduct the analysis, I utilized real bike-share data from Motivate International Inc., treated as Cyclistic's company data. The dataset included 12 CSV files covering the period from February 2022 to January 2023. The essential columns included ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, and member_casual.
 
-# Data Preparation and Cleaning:
-I began by exploring the data in Excel, but due to its massive size (over 5 million rows), I shifted to SQL in BigQuery for efficient processing. The initial steps involved combining the CSV files using the UNION operator and performing data cleaning to ensure accuracy. I thoroughly checked for misspellings and irregularities in string columns, enabling reliable analysis. Additionally, I calculated the ride duration in minutes and introduced new columns indicating the day of the week and month for each ride.
+## Data Preparation and Cleaning:
+Due to the massive size of the data (over 5 million rows), I shifted from Excel to SQL in BigQuery for efficient processing. The initial steps involved combining the CSV files using the UNION operator and performing data cleaning to ensure accuracy. I thoroughly checked for misspellings and irregularities in string columns, enabling reliable analysis. Additionally, I calculated the ride duration in minutes and introduced new columns indicating the day of the week and month for each ride.
 
-## Selecting all columns from the INFORMATION_SCHEMA.COLUMN_FIELD_PATHS table
-```sql
+## Analysis:
+I began by analyzing the bike type usage and found that electric bikes were the most popular choice for both casual and member riders, constituting approximately 22.04% and 29.09% of total rides, respectively.
 
-SELECT *
- FROM
-   `jaga-394318.divvy_tripdata.`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS
- WHERE
-   table_name = "202202-divvy-tripdata"    OR
-   table_name = "202203-divvy-tripdata"    OR
-   table_name = "202204-divvy-tripdata"    OR
-   table_name = "202205-divvy-tripdata_1"  OR
-   table_name = "202205-divvy-tripdata_2"  OR
-   table_name = "202206-divvy-tripdata_1"  OR
-   table_name = "202206-divvy-tripdata_2"  OR
-   table_name = "202207-divvy-tripdata_1"  OR
-   table_name = "202207-divvy-tripdata_2"  OR
-   table_name = "202208-divvy-tripdata_1"  OR
-   table_name = "202208-divvy-tripdata_2"  OR
-   table_name = "202209-divvy-tripdata_1"  OR
-   table_name = "202209-divvy-tripdata_2"  OR
-   table_name = "202210-divvy-tripdata_1"  OR
-   table_name = "202210-divvy-tripdata_2"  OR
-   table_name = "202211-divvy-tripdata"    OR
-   table_name = "202212-divvy-tripdata"    OR
-   table_name = "202301-divvy-tripdata"  
- ORDER BY column_name, table_name;
-```
-## Merge all datasets into one dataset using UNION ALL
+Further analysis revealed that members took a significantly higher number of rides (59.31% of total rides) compared to casual riders (40.69% of total rides).
+
+The average ride length for casual riders was longer (21.8 minutes) than for members (12.3 minutes), indicating that casual riders tend to use bikes for longer trips.
+
+Analyzing ride length by day of the week and month revealed interesting patterns. For members, the average ride length was consistent throughout the week, while casual riders showed longer rides on weekends and during the summer months.
+
+## Data Merging:
+## Merging all datasets into one dataset using UNION ALL:
 ```sql
 CREATE OR REPLACE TABLE divvy_tripdata. divvy_trip_datav1 AS 
 (
@@ -103,7 +86,8 @@ SELECT *
 ## Query Result:
 ![tablev1](https://github.com/thejagadeesh/Cyclistic-bike-share-analysis/assets/114074976/cff76633-e055-4f6d-af37-07ba2a822b5f)
 
-## Create a new table "divvy_trip_datav2" with calculated columns for ride length, day of the week, and month
+## Data Transformation and Cleanup: 
+Creating a new table "divvy_trip_data_v2" with calculated columns for ride length, day of the week, and month:
 ```sql
 CREATE TABLE divvy_tripdata.divvy_trip_datav2 AS
 SELECT ride_id,
@@ -127,14 +111,16 @@ FROM `jaga-394318.divvy_tripdata.divvy_trip_datav1`;
 ## Query Result:
 ![image](https://github.com/thejagadeesh/Cyclistic-bike-share-analysis/assets/114074976/49ca4f83-d7bb-4919-a0ed-5d164bc1480a)
 
-## Filter out erroneous data with negative ride lengths and rides lasting longer than a day
+## Data Filtering:
+Filter out erroneous data with negative ride lengths and rides lasting longer than a day:
 ```sql
 CREATE TABLE divvy_tripdata.divvy_trip_datav3 AS
 SELECT *
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav2`
 WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440;
 ```
-## Bike Type Usage and Percentages
+## Bike Type Usage and Percentages:
+Calculate the count and percentages of rides for each member and casual rider by bike type:
 ```sql
 SELECT
     member_casual,
@@ -161,7 +147,8 @@ Query Results:
 ```
 The query results reveal that electric bikes are the most popular choice for both casual and member riders, constituting approximately 22.04% and 29.09% of total rides, respectively, showcasing the significant adoption of electric bikes in the bike-sharing program.
 ```
-## Count of Rides and Percentages by Member/Casual
+## Count of Rides and Percentages by Member/Casual:
+Calculate the count and percentages of rides for each member and casual rider:
 ```sql
 SELECT
     member_casual,
@@ -180,7 +167,8 @@ Query Results:
 | member        | 3,405,385   | 59.31%  |
 | casual        | 2,336,506   | 40.69%  |
 
-## Analyze ride length for all riders
+## Analyze Ride Length for All Riders:
+Calculate the average, minimum, and maximum ride lengths for all riders:
 ```sql
 SELECT AVG(ride_length_minutes) AS avg,
             MIN(ride_length_minutes) AS min,
@@ -192,7 +180,8 @@ Query Result:
 |-----|--------------------|-----|---------|
 | 1   | 16.172750910806091 | 0.1 | 1439.9  |
 
-## calculate the number of rides, the count of round trips, the percentage of round trips, and the count of unique dates for each member_casual category
+## Round Trips Analysis:
+Calculate the number of rides, the count of round trips, the percentage of round trips, and the count of unique dates for each member_casual category:
 ```sql
 WITH RoundTrips AS (
   SELECT
@@ -224,7 +213,8 @@ Query Results:
 | casual        | 2,336,506   | 175,413          | 8.0%               | 365         |
 | member        | 3,405,385   | 117,827          | 3.0%               | 365         |
 
-## Calculate Average and Median Ride Lengths for members and casual riders
+## Average and Median Ride Lengths for Members and Casual Riders:
+Calculate the average and median ride lengths for members and casual riders separately:
 ```sql
 SELECT
   member_casual,
@@ -242,7 +232,8 @@ Query Result:
 | casual        | 21.8            | 12.8               |
 | member        | 12.3            | 8.8                |
 
-
+## Monthly and Day-of-the-Week Patterns:
+Analyze the count of rides for each member and casual rider by month and day of the week:
 ## Average Ride Length for Members by Day of the Week
 ```sql
 SELECT
@@ -255,7 +246,7 @@ SELECT
         WHEN 6 THEN 'Friday'
         WHEN 7 THEN 'Saturday'
     END AS day_of_week_name,
-    AVG(ride_length_minutes) AS avg_ride_length_member
+    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'member'
 GROUP BY day_of_week, day_of_week_name
@@ -263,14 +254,14 @@ ORDER BY day_of_week;
 ```
 Query Result:
 | Row | Day of Week | Avg Ride Length (Member) |
-|-----|-------------|-------------------------|
-| 1   | Sunday      | 13.627357021067917      |
-| 2   | Monday      | 11.91083204662049       |
-| 3   | Tuesday     | 11.711094865609073      |
-| 4   | Wednesday   | 11.767330485901484      |
-| 5   | Thursday    | 11.92166130352191       |
-| 6   | Friday      | 12.145869377617808      |
-| 7   | Saturday    | 13.75060719038890       |
+|-----|-------------|--------------------------|
+| 1   | Sunday      | 13.62                    |
+| 2   | Monday      | 11.91                    |
+| 3   | Tuesday     | 11.71                    |
+| 4   | Wednesday   | 11.76                    |
+| 5   | Thursday    | 11.92                    |
+| 6   | Friday      | 12.14                    |
+| 7   | Saturday    | 13.75                    |
 
 ## Average Ride Length for Casuals by Day of the Week
 ```sql
@@ -284,7 +275,7 @@ SELECT
         WHEN 6 THEN 'Friday'
         WHEN 7 THEN 'Saturday'
     END AS day_of_week_name,
-    AVG(ride_length_minutes) AS avg_ride_length_member
+    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'casual'
 GROUP BY day_of_week, day_of_week_name
@@ -292,14 +283,14 @@ ORDER BY day_of_week;
 ```
 Query Result:
 | Row | Day of Week | Avg Ride Length (Member) |
-|-----|-------------|-------------------------|
-| 1   | Sunday      | 24.93573437057055       |
-| 2   | Monday      | 22.205314466643586      |
-| 3   | Tuesday     | 19.450710402536494      |
-| 4   | Wednesday   | 18.76793536493415       |
-| 5   | Thursday    | 19.405664054334771      |
-| 6   | Friday      | 20.410732757723345      |
-| 7   | Saturday    | 24.49270656487392       |
+|-----|-------------|--------------------------|
+| 1   | Sunday      | 24.93                    | 
+| 2   | Monday      | 22.20                    |
+| 3   | Tuesday     | 19.45                    |
+| 4   | Wednesday   | 18.76                    |
+| 5   | Thursday    | 19.40                    |
+| 6   | Friday      | 20.41                    |
+| 7   | Saturday    | 24.49                    |
 
 ## Average Ride Length for Member Riders by Month
 ```sql
@@ -318,7 +309,7 @@ SELECT
         WHEN 11 THEN 'November'
         WHEN 12 THEN 'December'
     END AS month_name,
-    AVG(ride_length_minutes) AS avg_ride_length_member
+    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'member'
 GROUP BY month, month_name
@@ -326,19 +317,19 @@ ORDER BY month;
 ```
 Query Result:
 | Row | Month      | Avg Ride Length (Member) |
-|-----|------------|-------------------------|
-| 1   | January    | 10.078791593928646      |
-| 2   | February   | 11.061724699892434      |
-| 3   | March      | 11.710221591641952      |
-| 4   | April      | 11.36426956906293       |
-| 5   | May        | 13.068522652770556      |
-| 6   | June       | 13.663008435333284      |
-| 7   | July       | 13.441689477888913      |
-| 8   | August     | 13.091214674492942      |
-| 9   | September  | 12.637538322210908      |
-| 10  | October    | 11.54782980965555       |
-| 11  | November   | 10.868295228397228      |
-| 12  | December   | 10.3497908378188        |
+|-----|------------|--------------------------|
+| 1   | January    | 10.07                    |
+| 2   | February   | 11.06                    |
+| 3   | March      | 11.71                    |
+| 4   | April      | 11.36                    |
+| 5   | May        | 13.06                    |
+| 6   | June       | 13.66                    |
+| 7   | July       | 13.44                    |
+| 8   | August     | 13.09                    |
+| 9   | September  | 12.63                    |
+| 10  | October    | 11.54                    |
+| 11  | November   | 10.86                    |
+| 12  | December   | 10.34                    |
 
 ## Average Ride Length for Casual Riders by Month
 ```sql
@@ -357,7 +348,7 @@ SELECT
         WHEN 11 THEN 'November'
         WHEN 12 THEN 'December'
     END AS month_name,
-    AVG(ride_length_minutes) AS avg_ride_length_member
+    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'casual'
 GROUP BY month, month_name
@@ -366,18 +357,18 @@ ORDER BY month;
 Query Result:
 | Row | Month      | Avg Ride Length         |
 |-----|------------|-------------------------|
-| 1   | January    | 13.710693873458339      |
-| 2   | February   | 19.637080182253754      |
-| 3   | March      | 24.244702308491284      |
-| 4   | April      | 23.282971371377741      |
-| 5   | May        | 25.56147422204571       |
-| 6   | June       | 23.42742717786712       |
-| 7   | July       | 23.199642877429859      |
-| 8   | August     | 21.495009722408451      |
-| 9   | September  | 20.060855344296861      |
-| 10  | October    | 18.483160529824186      |
-| 11  | November   | 15.555658359448836      |
-| 12  | December   | 13.408455800241217      |
+| 1   | January    | 13.71                   |
+| 2   | February   | 19.63                   |
+| 3   | March      | 24.24                   |
+| 4   | April      | 23.28                   |
+| 5   | May        | 25.56                   |
+| 6   | June       | 23.42                   |
+| 7   | July       | 23.19                   |
+| 8   | August     | 21.49                   |
+| 9   | September  | 20.06                   |
+| 10  | October    | 18.48                   |
+| 11  | November   | 15.55                   |
+| 12  | December   | 13.40                   |
 
 ## Number of Rides Taken by Members in Each Month
 ```sql
@@ -883,34 +874,29 @@ Query Result:
 ## Tableau Dashboard Link:
 https://public.tableau.com/views/CyclisticBike-ShareAnalysis_16909122669020/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link
 
-# Key Findings and Insights:
+## Key Findings:
+* Electric bikes are the most popular choice for both casual and member riders, constituting approximately 22.04% and 29.09% of total rides, respectively.
+* Members take a significantly higher number of rides (59.31% of total rides) compared to casual riders (40.69% of total rides).
+* Casual riders tend to use bikes for longer trips, with an average ride length of 21.8 minutes, compared to 12.3 minutes for members.
+* There is a significant percentage of round trips taken by casual riders (8.0%) compared to member riders (3.0%).
+* Casual riders take longer rides on weekends and during the summer months, while members show consistent ride lengths throughout the week.
+* The top start stations for member riders are Kingsbury St & Kinzie St, Clark St & Elm St, and Wells St & Concord Ln, while the top start station for casual riders is Streeter Dr & Grand Ave.
+* The top end stations for member riders are Kingsbury St & Kinzie St, Clark St & Elm St, and Wells St & Concord Ln, while the top end station for casual riders is Streeter Dr & Grand Ave.
 
-Ride Length: Casual riders have longer average ride durations (26.3 minutes) compared to annual members (13.0 minutes). Casual riders tend to use bikes for leisurely or extended rides, while members prefer shorter, utilitarian trips.
-
-## Day of the Week: 
-Both annual members and casual riders exhibit higher ride counts on weekends, particularly Saturdays and Sundays. While annual members maintain consistent ride counts throughout the week, casual riders show a substantial increase on weekends.
-
-## Month: 
-Ride counts for both groups surge during summer months, from May to September. Casual riders exhibit a significant spike in May, June, and July, while annual members' rides are more evenly distributed during the summer.
-
-## Rideable Type: 
-Classic bikes are the most preferred type for both annual members and casual riders. However, electric bikes enjoy higher popularity among annual members.
-
-## Popular Stations: 
-Kingsbury St & Kinzie St, Clark St & Elm St, and Wells St & Concord Ln are the top three most popular starting and ending stations for both annual members and casual riders.
+## Insights:
+* Electric bikes have gained widespread popularity among both casual and member riders, indicating that offering more electric bikes could attract even more customers.
+* Members are more engaged and frequent users of the bike-share service, making them an ideal target for membership retention and loyalty programs.
+* Casual riders might be attracted to the service due to longer trip durations. Offering special deals or promotions for longer rides could encourage casual riders to become annual members.
+* The higher percentage of round trips taken by casual riders suggests that they might be using the bikes for leisure activities or short commutes. Tailoring marketing strategies to highlight the convenience of round trips might attract more casual riders.
 
 ## Recommendations:
-Based on the analysis, I propose the following top three recommendations to increase annual memberships:
-
-* Target Weekends and Summer Months: Implement targeted marketing efforts, promotional offers, discounts, and special events during weekends and summer to attract more casual riders and encourage them to sign up for annual memberships.
-
-* Promote Electric Bikes: Highlight the numerous benefits of electric bikes, such as easier navigation and extended ride capabilities, to entice casual riders into transitioning to annual memberships.
-
-* Loyalty Rewards Program: Introduce a loyalty rewards program tailored for frequent riders, offering enticing rewards like points, discounts, or exclusive perks for reaching specific ride milestones. This incentivization strategy aims to encourage casual riders to commit to annual memberships.
-
-By adopting these data-driven recommendations, Cyclistic can effectively convert casual riders into loyal annual members, ultimately maximizing annual memberships and driving future growth. This case study showcases my analytical skills and expertise, providing potential employers with a concrete demonstration of my capabilities.
-
-
-
-
-
+## Promote Electric Bikes: 
+Launch marketing campaigns focusing on the convenience and benefits of electric bikes to encourage both casual and member riders to choose electric bikes more frequently.
+## Targeted Marketing for Casual Riders: 
+Develop targeted marketing campaigns aimed at converting casual riders into annual members. Offer discounts, loyalty programs, or bundle deals to incentivize them to sign up for annual memberships.
+## Promote Longer Rides: 
+Create promotions or incentives that reward users for taking longer rides. For example, offer discounted rates for rides exceeding a certain duration.
+## Focus on Round Trips: 
+Design marketing materials highlighting the convenience and flexibility of round trips. Encourage casual riders to use the bikes for short errands or sightseeing, emphasizing the ease of returning to their starting point.
+## Conclusion:
+The analysis revealed significant differences in usage patterns between casual and member riders. Electric bikes are popular among both groups, but members take more rides and have shorter average ride lengths. Casual riders, on the other hand, tend to take longer trips and have a higher percentage of round trips. To boost annual memberships, targeted marketing strategies should be designed to cater to the specific preferences of casual riders, promote the benefits of electric bikes, and incentivize longer rides. By implementing these recommendations, Cyclistic can drive growth in the number of annual members and increase overall customer engagement with the bike-share service.
