@@ -134,6 +134,51 @@ SELECT *
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav2`
 WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440;
 ```
+## Bike Type Usage and Percentages
+```sql
+SELECT
+    member_casual,
+    rideable_type,
+    COUNT(1) AS total_rides,
+    ROUND(100 * COUNT(1) / 5741891, 2) AS ride_percentage,
+    COUNT(DISTINCT started_at) AS total_unique_dates
+FROM
+    `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+GROUP BY
+    member_casual,
+    rideable_type
+ORDER BY
+    member_casual;
+```
+Query Results:
+| member_casual | rideable_type | total_rides | ride_percentage | total_unique_dates |
+|---------------|---------------|-------------|-----------------|--------------------|
+| casual        | electric_bike | 1,265,338   | 22.04%          | 1,207,357          |
+| casual        | classic_bike  | 895,053     | 15.59%          | 854,268            |
+| casual        | docked_bike   | 176,115     | 3.07%           | 172,941            |
+| member        | electric_bike | 1,670,147   | 29.09%          | 1,592,473          |
+| member        | classic_bike  | 1,735,238   | 30.22%          | 1,639,652          |
+```
+The query results reveal that electric bikes are the most popular choice for both casual and member riders, constituting approximately 22.04% and 29.09% of total rides, respectively, showcasing the significant adoption of electric bikes in the bike-sharing program.
+```
+## Count of Rides and Percentages by Member/Casual
+```sql
+SELECT
+    member_casual,
+    COUNT(*) AS count_rides,
+    ROUND(COUNT(*) * 100 / SUM(COUNT(*)) OVER (), 2) AS percent
+FROM
+    `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+GROUP BY 
+    member_casual
+ORDER BY
+    count_rides DESC;
+```
+Query Results:
+| member_casual | count_rides | percent |
+|---------------|-------------|---------|
+| member        | 3,405,385   | 59.31%  |
+| casual        | 2,336,506   | 40.69%  |
 
 ## Analyze ride length for all riders
 ```sql
@@ -147,19 +192,56 @@ Query Result:
 |-----|--------------------|-----|---------|
 | 1   | 16.172750910806091 | 0.1 | 1439.9  |
 
-
-## Calculate average ride length for members and casual riders
+## calculate the number of rides, the count of round trips, the percentage of round trips, and the count of unique dates for each member_casual category
 ```sql
-SELECT member_casual,
-            AVG(ride_length_minutes) AS avg_ride_length
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-GROUP BY member_casual;
+WITH RoundTrips AS (
+  SELECT
+    ride_id,
+    started_at,
+    ended_at,
+    member_casual,
+    ride_length_minutes,
+    start_station_name,
+    end_station_name,
+    IF(start_station_name = end_station_name, 1, 0) AS is_round_trip
+  FROM
+    `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+)
+SELECT
+  member_casual,
+  COUNT(1) AS count_rides,
+  SUM(is_round_trip) AS count_round_trip,
+  (ROUND(SAFE_DIVIDE(SUM(is_round_trip), COUNT(1)), 2) * 100) AS rate_round_percent,
+  COUNT(DISTINCT DATE(started_at)) AS count_dates
+FROM
+  RoundTrips
+GROUP BY
+  member_casual;
+```
+Query Results:
+| member_casual | count_rides | count_round_trip | rate_round_percent | count_dates |
+|---------------|-------------|------------------|--------------------|-------------|
+| casual        | 2,336,506   | 175,413          | 8.0%               | 365         |
+| member        | 3,405,385   | 117,827          | 3.0%               | 365         |
+
+## Calculate Average and Median Ride Lengths for members and casual riders
+```sql
+SELECT
+  member_casual,
+  ROUND(AVG(ride_length_minutes), 1) AS Avg_Ride_Length,
+  ROUND(APPROX_QUANTILES(ride_length_minutes, 2)[OFFSET(1)], 1) AS median_Ride_Length
+FROM
+  `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+GROUP BY
+  member_casual;
+
 ```
 Query Result:
-| Row | member_casual | Avg Ride Length    |
-|-----|---------------|--------------------|
-| 1   | casual        | 21.771984707079753 |
-| 2   | member        | 12.3309992849560   |
+| member_casual | Avg_Ride_Length | median_Ride_Length |
+|---------------|-----------------|--------------------|
+| casual        | 21.8            | 12.8               |
+| member        | 12.3            | 8.8                |
+
 
 ## Average Ride Length for Members by Day of the Week
 ```sql
@@ -794,6 +876,12 @@ Query Result:
 | 8    | Kingsbury St & Kinzie St              | 67,008             |
 | 9    | Theater on the Lake                   | 66,051             |
 | 10   | Wells St & Elm St                     | 62,712             |
+
+# Dashboard
+![Cylistic Dashboard](https://github.com/thejagadeesh/Cyclistic-bike-share-analysis/assets/114074976/91de2f15-7270-4767-aa34-ce0e1aadef4a)
+
+## Tableau Dashboard Link:
+https://public.tableau.com/views/CyclisticBike-ShareAnalysis_16909122669020/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link
 
 # Key Findings and Insights:
 
