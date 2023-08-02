@@ -166,6 +166,51 @@ Query Results:
 |---------------|-------------|---------|
 | member        | 3,405,385   | 59.31%  |
 | casual        | 2,336,506   | 40.69%  |
+## Calculate the number of rides taken by members and casual riders:
+```sql
+SELECT member_casual,
+            COUNT(*) AS rides_taken
+FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+GROUP BY member_casual;
+```
+Query Results:
+| Row | Member Casual | Rides Taken |
+|-----|---------------|-------------|
+| 1   | casual        | 2336506     |
+| 2   | member        | 3405385     |
+
+## Member Rides Count by Rideable Type:
+```sql
+SELECT rideable_type,
+            COUNT(*) AS member_rides
+FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+WHERE ride_length_minutes > 0
+            AND ride_length_minutes < 1440
+            AND member_casual = 'member'
+GROUP BY rideable_type
+```
+Query Results:
+| Row | Rideable Type | Member Rides |
+|-----|---------------|--------------|
+| 1   | electric_bike | 1670147      |
+| 2   | classic_bike  | 1735238      |
+
+## Casual Rides Count by Rideable Type:
+```sql
+SELECT rideable_type,
+            COUNT(*) AS casual_rides
+FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
+WHERE ride_length_minutes > 0
+            AND ride_length_minutes < 1440
+            AND member_casual = 'casual'
+GROUP BY rideable_type
+```
+Query Results:
+| Row | Rideable Type | Casual Rides |
+|-----|---------------|--------------|
+| 1   | electric_bike | 1265338      |
+| 2   | docked_bike   | 176115       |
+| 3   | classic_bike  | 895053       |
 
 ## Analyze Ride Length for All Riders:
 Calculate the average, minimum, and maximum ride lengths for all riders:
@@ -175,7 +220,7 @@ SELECT AVG(ride_length_minutes) AS avg,
             MAX(ride_length_minutes) AS max
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`;
 ```
-Query Result:
+Query Results:
 | Row | Avg                | Min | Max     |
 |-----|--------------------|-----|---------|
 | 1   | 16.172750910806091 | 0.1 | 1439.9  |
@@ -226,73 +271,13 @@ GROUP BY
   member_casual;
 
 ```
-Query Result:
+Query Results:
 | member_casual | Avg_Ride_Length | median_Ride_Length |
 |---------------|-----------------|--------------------|
 | casual        | 21.8            | 12.8               |
 | member        | 12.3            | 8.8                |
 
-## Monthly and Day-of-the-Week Patterns:
-Analyze the count of rides for each member and casual rider by month and day of the week:
-## Average Ride Length for Members by Day of the Week
-```sql
-SELECT
-    CASE day_of_week
-        WHEN 1 THEN 'Sunday'
-        WHEN 2 THEN 'Monday'
-        WHEN 3 THEN 'Tuesday'
-        WHEN 4 THEN 'Wednesday'
-        WHEN 5 THEN 'Thursday'
-        WHEN 6 THEN 'Friday'
-        WHEN 7 THEN 'Saturday'
-    END AS day_of_week_name,
-    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE member_casual = 'member'
-GROUP BY day_of_week, day_of_week_name
-ORDER BY day_of_week;
-```
-Query Result:
-| Row | Day of Week | Avg Ride Length (Member) |
-|-----|-------------|--------------------------|
-| 1   | Sunday      | 13.62                    |
-| 2   | Monday      | 11.91                    |
-| 3   | Tuesday     | 11.71                    |
-| 4   | Wednesday   | 11.76                    |
-| 5   | Thursday    | 11.92                    |
-| 6   | Friday      | 12.14                    |
-| 7   | Saturday    | 13.75                    |
-
-## Average Ride Length for Casuals by Day of the Week
-```sql
-SELECT
-    CASE day_of_week
-        WHEN 1 THEN 'Sunday'
-        WHEN 2 THEN 'Monday'
-        WHEN 3 THEN 'Tuesday'
-        WHEN 4 THEN 'Wednesday'
-        WHEN 5 THEN 'Thursday'
-        WHEN 6 THEN 'Friday'
-        WHEN 7 THEN 'Saturday'
-    END AS day_of_week_name,
-    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE member_casual = 'casual'
-GROUP BY day_of_week, day_of_week_name
-ORDER BY day_of_week;
-```
-Query Result:
-| Row | Day of Week | Avg Ride Length (Member) |
-|-----|-------------|--------------------------|
-| 1   | Sunday      | 24.93                    | 
-| 2   | Monday      | 22.20                    |
-| 3   | Tuesday     | 19.45                    |
-| 4   | Wednesday   | 18.76                    |
-| 5   | Thursday    | 19.40                    |
-| 6   | Friday      | 20.41                    |
-| 7   | Saturday    | 24.49                    |
-
-## Average Ride Length for Member Riders by Month
+## Monthly Analysis of Trip Data for Members:
 ```sql
 SELECT
     CASE month
@@ -309,29 +294,30 @@ SELECT
         WHEN 11 THEN 'November'
         WHEN 12 THEN 'December'
     END AS month_name,
+    COUNT(*) AS rides_taken,
     Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'member'
 GROUP BY month, month_name
 ORDER BY month;
 ```
-Query Result:
-| Row | Month      | Avg Ride Length (Member) |
-|-----|------------|--------------------------|
-| 1   | January    | 10.07                    |
-| 2   | February   | 11.06                    |
-| 3   | March      | 11.71                    |
-| 4   | April      | 11.36                    |
-| 5   | May        | 13.06                    |
-| 6   | June       | 13.66                    |
-| 7   | July       | 13.44                    |
-| 8   | August     | 13.09                    |
-| 9   | September  | 12.63                    |
-| 10  | October    | 11.54                    |
-| 11  | November   | 10.86                    |
-| 12  | December   | 10.34                    |
+Query Results:
+| Row | month_name  | rides_taken | avg_ride_length_member |
+| --- | ----------- | ----------- | ---------------------- |
+| 1   | January     | 150082      | 10.08                  |
+| 2   | February    | 93883       | 11.06                  |
+| 3   | March       | 193825      | 11.71                  |
+| 4   | April       | 244212      | 11.36                  |
+| 5   | May         | 353864      | 13.07                  |
+| 6   | June        | 399510      | 13.66                  |
+| 7   | July        | 416827      | 13.44                  |
+| 8   | August      | 426427      | 13.09                  |
+| 9   | September   | 404139      | 12.64                  |
+| 10  | October     | 349209      | 11.55                  |
+| 11  | November    | 236671      | 10.87                  |
+| 12  | December    | 136736      | 10.35                  |
 
-## Average Ride Length for Casual Riders by Month
+## Monthly Analysis of Trip Data for Casuals:
 ```sql
 SELECT
     CASE month
@@ -348,107 +334,30 @@ SELECT
         WHEN 11 THEN 'November'
         WHEN 12 THEN 'December'
     END AS month_name,
-    Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
+    COUNT(*) AS rides_taken,
+    ROUND(AVG(ride_length_minutes), 2) AS avg_ride_length_casual
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'casual'
 GROUP BY month, month_name
 ORDER BY month;
 ```
-Query Result:
-| Row | Month      | Avg Ride Length         |
-|-----|------------|-------------------------|
-| 1   | January    | 13.71                   |
-| 2   | February   | 19.63                   |
-| 3   | March      | 24.24                   |
-| 4   | April      | 23.28                   |
-| 5   | May        | 25.56                   |
-| 6   | June       | 23.42                   |
-| 7   | July       | 23.19                   |
-| 8   | August     | 21.49                   |
-| 9   | September  | 20.06                   |
-| 10  | October    | 18.48                   |
-| 11  | November   | 15.55                   |
-| 12  | December   | 13.40                   |
+Query Results:
+| Row | month_name | rides_taken | avg_ride_length_casual|
+|-----|------------|-------------|-----------------------|
+| 1   | January    | 39892       | 13.71                 |
+| 2   | February   | 21289       | 19.64                 |
+| 3   | March      | 89539       | 24.24                 |
+| 4   | April      | 125888      | 23.28                 |
+| 5   | May        | 279483      | 25.56                 |
+| 6   | June       | 367814      | 23.43                 |
+| 7   | July       | 404903      | 23.2                  |
+| 8   | August     | 357936      | 21.5                  |
+| 9   | September  | 295951      | 20.06                 |
+| 10  | October    | 208522      | 18.48                 |
+| 11  | November   | 100515      | 15.56                 |
+| 12  | December   | 44774       | 13.41                 |
 
-## Number of Rides Taken by Members in Each Month
-```sql
-SELECT
-    CASE month
-        WHEN 1 THEN 'January'
-        WHEN 2 THEN 'February'
-        WHEN 3 THEN 'March'
-        WHEN 4 THEN 'April'
-        WHEN 5 THEN 'May'
-        WHEN 6 THEN 'June'
-        WHEN 7 THEN 'July'
-        WHEN 8 THEN 'August'
-        WHEN 9 THEN 'September'
-        WHEN 10 THEN 'October'
-        WHEN 11 THEN 'November'
-        WHEN 12 THEN 'December'
-    END AS month,
-    COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE member_casual = 'member'
-GROUP BY month
-ORDER BY month;
-```
-Query Result:
-| Row | Month      | Rides Taken |
-|-----|------------|-------------|
-| 1   | January    | 150082      |
-| 2   | February   | 93883       |
-| 3   | March      | 193825      |
-| 4   | April      | 244212      |
-| 5   | May        | 353864      |
-| 6   | June       | 399510      |
-| 7   | July       | 416827      |
-| 8   | August     | 426427      |
-| 9   | September  | 404139      |
-| 10  | October    | 349209      |
-| 11  | November   | 236671      |
-| 12  | December   | 136736      |
-
-##Number of Rides Taken by Casuals in Each Month
-```sql
-SELECT
-    CASE month
-        WHEN 1 THEN 'January'
-        WHEN 2 THEN 'February'
-        WHEN 3 THEN 'March'
-        WHEN 4 THEN 'April'
-        WHEN 5 THEN 'May'
-        WHEN 6 THEN 'June'
-        WHEN 7 THEN 'July'
-        WHEN 8 THEN 'August'
-        WHEN 9 THEN 'September'
-        WHEN 10 THEN 'October'
-        WHEN 11 THEN 'November'
-        WHEN 12 THEN 'December'
-    END AS month,
-    COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE member_casual = 'casual'
-GROUP BY month
-ORDER BY month;
-```
-Query Result:
-| Row | Month      | Rides Taken |
-|-----|------------|-------------|
-| 1   | July       | 404903      |
-| 2   | June       | 367814      |
-| 3   | August     | 357936      |
-| 4   | September  | 295951      |
-| 5   | May        | 279483      |
-| 6   | October    | 208522      |
-| 7   | April      | 125888      |
-| 8   | November   | 100515      |
-| 9   | March      | 89539       |
-| 10  | December   | 44774       |
-| 11  | January    | 39892       |
-| 12  | February   | 21289       |
-
-## Calculate the number of rides taken by Members on each day of the week
+## Day-of-the-Week Analysis for Members:
 ```sql
 SELECT CASE
             WHEN day_of_week = 1 THEN 'Sunday'
@@ -458,24 +367,25 @@ SELECT CASE
             WHEN day_of_week = 5 THEN 'Thursday'
             WHEN day_of_week = 6 THEN 'Friday'
             WHEN day_of_week = 7 THEN 'Saturday' END AS day_of_the_week,
-            COUNT(*) AS rides_taken
+            COUNT(*) AS rides_taken,
+            Round(AVG(ride_length_minutes), 2) AS avg_ride_length_member
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'member'
 GROUP BY day_of_week
 ORDER BY day_of_week;
 ```
-Query Result:
-| Row | Day of the Week | Rides Taken |
-|-----|-----------------|-------------|
-| 1   | Sunday          | 393537      |
-| 2   | Monday          | 481848      |
-| 3   | Tuesday         | 533481      |
-| 4   | Wednesday       | 534985      |
-| 5   | Thursday        | 540106      |
-| 6   | Friday          | 475110      |
-| 7   | Saturday        | 446318      |
+Query Results:
+| Row | day_of_the_week | rides_taken | avg_ride_length_member|
+|-----|-----------------|-------------|-----------------------|
+| 1   | Sunday          | 393537      | 13.63                 |
+| 2   | Monday          | 481848      | 11.91                 |
+| 3   | Tuesday         | 533481      | 11.71                 |
+| 4   | Wednesday       | 534985      | 11.77                 |
+| 5   | Thursday        | 540106      | 11.92                 |
+| 6   | Friday          | 475110      | 12.15                 |
+| 7   | Saturday        | 446318      | 13.75                 |
 
-## Calculate the number of rides taken by Casuals on each day of the week
+## Day-of-the-Week Analysis for Casuals:
 ```sql
 SELECT CASE
             WHEN day_of_week = 1 THEN 'Sunday'
@@ -485,22 +395,23 @@ SELECT CASE
             WHEN day_of_week = 5 THEN 'Thursday'
             WHEN day_of_week = 6 THEN 'Friday'
             WHEN day_of_week = 7 THEN 'Saturday' END AS day_of_the_week,
-            COUNT(*) AS rides_taken
+            COUNT(*) AS rides_taken,
+            Round(AVG(ride_length_minutes), 2) AS avg_ride_length_casual
 FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE member_casual = 'casual'
 GROUP BY day_of_week
 ORDER BY day_of_week;
 ```
-Query Result:
-| Row | Day of the Week | Rides Taken |
-|-----|-----------------|-------------|
-| 1   | Sunday          | 391553      |
-| 2   | Monday          | 280141      |
-| 3   | Tuesday         | 267454      |
-| 4   | Wednesday       | 277187      |
-| 5   | Thursday        | 310961      |
-| 6   | Friday          | 336223      |
-| 7   | Saturday        | 472987      |
+Query Results:
+| Row | day_of_the_week | rides_taken | avg_ride_length_casual|
+|-----|-----------------|-------------|-----------------------|
+| 1   | Sunday          | 391553      | 24.94                 |
+| 2   | Monday          | 280141      | 22.21                 |
+| 3   | Tuesday         | 267454      | 19.45                 |
+| 4   | Wednesday       | 277187      | 18.77                 |
+| 5   | Thursday        | 310961      | 19.41                 |
+| 6   | Friday          | 336223      | 20.41                 |
+| 7   | Saturday        | 472987      | 24.49                 |
 
 ## Create a table to store the count of rides taken by members from each start station.
 ```sql
@@ -512,7 +423,7 @@ WHERE start_station_name IS NOT NULL
 GROUP BY start_station_name
 ORDER BY COUNT(*) DESC;
 ```
-- Create a table to store the count of rides taken by members to each end station.
+## Create a table to store the count of rides taken by members to each end station.
 ```sql
 CREATE TABLE divvy_tripdata.end_station_count_members AS
 SELECT end_station_name AS station_name,
@@ -542,131 +453,6 @@ WHERE end_station_name IS NOT NULL
 GROUP BY end_station_name
 ORDER BY COUNT(*) DESC;
 ```
-## count of rides taken by members for each month
-```sql
-SELECT
-    CASE month
-        WHEN 1 THEN 'January'
-        WHEN 2 THEN 'February'
-        WHEN 3 THEN 'March'
-        WHEN 4 THEN 'April'
-        WHEN 5 THEN 'May'
-        WHEN 6 THEN 'June'
-        WHEN 7 THEN 'July'
-        WHEN 8 THEN 'August'
-        WHEN 9 THEN 'September'
-        WHEN 10 THEN 'October'
-        WHEN 11 THEN 'November'
-        WHEN 12 THEN 'December'
-    END AS month_name,
-    member_casual,
-    COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440 AND member_casual = 'member'
-GROUP BY month, month_name, member_casual
-ORDER BY month, member_casual;
-```
-Query Result:
-| Row | Month     | Member Casual | Rides Taken |
-|-----|-----------|---------------|-------------|
-| 1   | January   | member        | 150082      |
-| 2   | February  | member        | 93883       |
-| 3   | March     | member        | 193825      |
-| 4   | April     | member        | 244212      |
-| 5   | May       | member        | 353864      |
-| 6   | June      | member        | 399510      |
-| 7   | July      | member        | 416827      |
-| 8   | August    | member        | 426427      |
-| 9   | September | member        | 404139      |
-| 10  | October   | member        | 349209      |
-| 11  | November  | member        | 236671      |
-| 12  | December  | member        | 136736      |
-
-## Count of rides taken by casuals for each month
-```sql
-SELECT
-    CASE month
-        WHEN 1 THEN 'January'
-        WHEN 2 THEN 'February'
-        WHEN 3 THEN 'March'
-        WHEN 4 THEN 'April'
-        WHEN 5 THEN 'May'
-        WHEN 6 THEN 'June'
-        WHEN 7 THEN 'July'
-        WHEN 8 THEN 'August'
-        WHEN 9 THEN 'September'
-        WHEN 10 THEN 'October'
-        WHEN 11 THEN 'November'
-        WHEN 12 THEN 'December'
-    END AS month_name,
-    member_casual,
-    COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440 AND member_casual = 'casual'
-GROUP BY month, month_name, member_casual
-ORDER BY month, member_casual;
-```
-Query Result:
-| Row | Month     | Member Casual | Rides Taken |
-|-----|-----------|---------------|-------------|
-| 1   | January   | casual        | 39892       |
-| 2   | February  | casual        | 21289       |
-| 3   | March     | casual        | 89539       |
-| 4   | April     | casual        | 125888      |
-| 5   | May       | casual        | 279483      |
-| 6   | June      | casual        | 367814      |
-| 7   | July      | casual        | 404903      |
-| 8   | August    | casual        | 357936      |
-| 9   | September | casual        | 295951      |
-| 10  | October   | casual        | 208522      |
-| 11  | November  | casual        | 100515      |
-| 12  | December  | casual        | 44774       |
-
-## Calculate the number of rides taken by members and casual riders
-```sql
-SELECT member_casual,
-            COUNT(*) AS rides_taken
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-GROUP BY member_casual;
-```
-Query Result:
-| Row | Member Casual | Rides Taken |
-|-----|---------------|-------------|
-| 1   | casual        | 2336506     |
-| 2   | member        | 3405385     |
-
-## Member Rides Count by Rideable Type
-```sql
-SELECT rideable_type,
-            COUNT(*) AS member_rides
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE ride_length_minutes > 0
-            AND ride_length_minutes < 1440
-            AND member_casual = 'member'
-GROUP BY rideable_type
-```
-Query Result:
-| Row | Rideable Type | Member Rides |
-|-----|---------------|--------------|
-| 1   | electric_bike | 1670147      |
-| 2   | classic_bike  | 1735238      |
-
-## Casual Rides Count by Rideable Type
-```sql
-SELECT rideable_type,
-            COUNT(*) AS casual_rides
-FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
-WHERE ride_length_minutes > 0
-            AND ride_length_minutes < 1440
-            AND member_casual = 'casual'
-GROUP BY rideable_type
-```
-Query Result:
-| Row | Rideable Type | Casual Rides |
-|-----|---------------|--------------|
-| 1   | electric_bike | 1265338      |
-| 2   | docked_bike   | 176115       |
-| 3   | classic_bike  | 895053       |
 
 ## Calculate the total number of visits to start station for members and casual riders
 ```sql
@@ -677,7 +463,7 @@ FROM `jaga-394318.divvy_tripdata.divvy_trip_datav3`
 WHERE ride_length_minutes > 0 AND ride_length_minutes < 1440
 GROUP BY start_station_name, member_casual;
 ```
-Query Result:
+Query Results:
 | Row | Station Name                             | Member/Casual | Total Visits |
 |-----|------------------------------------------|---------------|--------------|
 | 1   | Monticello Ave & Chicago Ave             | member        | 92           |
@@ -691,7 +477,7 @@ Query Result:
 | 9   | Menard Ave & Division St                 | casual        | 59           |
 | 10	 | Leamington Ave & Hirsch St               | casual        | 83           |
 
-## Finding the most popular start stations for member riders
+## Finding the most popular start stations for member riders:
 ```sql
 SELECT start_station_name,
             COUNT(*) AS number_of_member_rides
@@ -703,7 +489,7 @@ WHERE ride_length_minutes < 1440
 GROUP BY start_station_name
 ORDER BY COUNT(*) DESC
 ```
-Query Result:
+Query Results:
 | Row |    Start Station Name       | Number of Member Rides |
 |-----|-----------------------------|------------------------|
 | 1   | Kingsbury St & Kinzie St    | 25,208                 |
@@ -717,7 +503,7 @@ Query Result:
 | 9   | Clinton St & Madison St     | 19,232                 |
 | 10  | Broadway & Barry Ave        | 18,004                 |
 
-## Finding the most popular start stations for casual riders
+## Finding the most popular start stations for casual riders:
 ```sql
 SELECT start_station_name,
             COUNT(*) AS number_of_casual_rides
@@ -729,7 +515,7 @@ WHERE ride_length_minutes < 1440
 GROUP BY start_station_name
 ORDER BY COUNT(*) DESC
 ```
-Query Result:
+Query Results:
 | Row |    Start Station Name              | Number of Casual Rides |
 |-----|------------------------------------|------------------------|
 | 1   | Streeter Dr & Grand Ave            | 58,091                 |
@@ -744,7 +530,7 @@ Query Result:
 | 10  | Clark St & Armitage Ave            | 13,840                 |
 
 
-## Count Number of Member Rides per End Station
+## Count Number of Member Rides per End Station:
 ```sql
 SELECT end_station_name,
             COUNT(*) AS number_of_member_rides
@@ -756,7 +542,7 @@ WHERE ride_length_minutes < 1440
 GROUP BY end_station_name
 ORDER BY COUNT(*) DESC
 ```
-Query Result:
+Query Results:
 | Row |        End Station Name       | Number of Member Rides |
 |-----|-------------------------------|-----------------------|
 | 1   | Kingsbury St & Kinzie St      | 25,073                |
@@ -770,7 +556,7 @@ Query Result:
 | 9   | Wells St & Elm St             | 19,094                |
 | 10  | Broadway & Barry Ave          | 18,353                |
 
-## Count Number of Casual Rides per End Station
+## Count Number of Casual Rides per End Station:
 ```sql
 SELECT end_station_name,
             COUNT(*) AS number_of_member_rides
@@ -782,7 +568,7 @@ WHERE ride_length_minutes < 1440
 GROUP BY end_station_name
 ORDER BY COUNT(*) DESC
 ```
-Query Result:
+Query Results:
 | Rank |         End Station Name           | Number of Member Rides |
 |------|------------------------------------|------------------------|
 | 1    | Streeter Dr & Grand Ave            | 60,047                |
@@ -797,7 +583,7 @@ Query Result:
 | 10   | Clark St & Lincoln Ave             | 13,626                |
 
 
-## Calculate the total number of visits to each station for members by joining the start_station_count_members and end_station_count_members tables.
+## Calculate the total number of visits to each station for members by joining the start_station_count_members and end_station_count_members tables:
 
 -- We are using a JOIN operation on the station_name column to match the stations between the two tables.
 
@@ -815,7 +601,7 @@ ON
 ORDER BY
     total_member_visits DESC;
 ```
-Query Result:
+Query Results:
 | Rank |             Station Name            | Total Member Visits |
 |------|-------------------------------------|--------------------|
 | 1    | Streeter Dr & Grand Ave             | 75,303             |
@@ -829,7 +615,7 @@ Query Result:
 | 9    | Theater on the Lake                 | 32,981             |
 | 10   | Wells St & Elm St                   | 31,910             |
 
-## calculate the total number of casual visits to each station by adding the number_of_casual_rides from the start_station_count_casual table.
+## calculate the total number of casual visits to each station by adding the number_of_casual_rides from the start_station_count_casual table:
 
 -- with the number_of_casual_rides from the end_station_count_casual table. The tables are joined on the station_name column.
 
@@ -853,7 +639,7 @@ ON
 ORDER BY 
     total_casual_visits DESC;
 ```
-Query Result:
+Query Results:
 
 | Rank | Station Name                          |Total Casual Visits |
 | ---- | ------------------------------------  | ------------------ |
@@ -890,13 +676,13 @@ https://public.tableau.com/views/CyclisticBike-ShareAnalysis_16909122669020/Dash
 * The higher percentage of round trips taken by casual riders suggests that they might be using the bikes for leisure activities or short commutes. Tailoring marketing strategies to highlight the convenience of round trips might attract more casual riders.
 
 ## Recommendations:
-## Promote Electric Bikes: 
+### Promote Electric Bikes: 
 Launch marketing campaigns focusing on the convenience and benefits of electric bikes to encourage both casual and member riders to choose electric bikes more frequently.
-## Targeted Marketing for Casual Riders: 
+### Targeted Marketing for Casual Riders: 
 Develop targeted marketing campaigns aimed at converting casual riders into annual members. Offer discounts, loyalty programs, or bundle deals to incentivize them to sign up for annual memberships.
-## Promote Longer Rides: 
+### Promote Longer Rides: 
 Create promotions or incentives that reward users for taking longer rides. For example, offer discounted rates for rides exceeding a certain duration.
-## Focus on Round Trips: 
+### Focus on Round Trips: 
 Design marketing materials highlighting the convenience and flexibility of round trips. Encourage casual riders to use the bikes for short errands or sightseeing, emphasizing the ease of returning to their starting point.
 ## Conclusion:
 The analysis revealed significant differences in usage patterns between casual and member riders. Electric bikes are popular among both groups, but members take more rides and have shorter average ride lengths. Casual riders, on the other hand, tend to take longer trips and have a higher percentage of round trips. To boost annual memberships, targeted marketing strategies should be designed to cater to the specific preferences of casual riders, promote the benefits of electric bikes, and incentivize longer rides. By implementing these recommendations, Cyclistic can drive growth in the number of annual members and increase overall customer engagement with the bike-share service.
