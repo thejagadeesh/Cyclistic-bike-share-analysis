@@ -1,4 +1,4 @@
-# Cyclistic Bike-Share Analysis: Maximizing Annual Memberships
+# Cyclistic Bike-Share Analysis: Maximizing Annual Membership
 ![cylistic](https://github.com/thejagadeesh/Cyclistic-bike-share-analysis/assets/114074976/16142766-bcca-4215-8d2c-9658cb7defb4)
 
 ## Introduction:
