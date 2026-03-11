@@ -686,3 +686,9 @@ Create promotions or incentives that reward users for taking longer rides. For e
 Design marketing materials highlighting the convenience and flexibility of round trips. Encourage casual riders to use the bikes for short errands or sightseeing, emphasizing the ease of returning to their starting point.
 ## Conclusion:
 The analysis revealed significant differences in usage patterns between casual and member riders. Electric bikes are popular among both groups, but members take more rides and have shorter average ride lengths. Casual riders, on the other hand, tend to take longer trips and have a higher percentage of round trips. To boost annual memberships, targeted marketing strategies should be designed to cater to the specific preferences of casual riders, promote the benefits of electric bikes, and incentivize longer rides. By implementing these recommendations, Cyclistic can drive growth in the number of annual members and increase overall customer engagement with the bike-share service.
+
+<img src="https://raw.githubusercontent.com/BEPb/BEPb/194bc176c0b3f2ef01a883ff206499b86c5ce72f/assets/Bottom_down.svg" width="4000" height="250" />
+<h4 align="center">
+<h4 align="center">
+  <a href="https://sites.google.com/view/jagadeeshr" title="Portfolio"> Show More 🔍</a>
+</h4>
